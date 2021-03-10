@@ -7,6 +7,7 @@ Both Python and Matlab versions will be available. See example.m and example.py 
 
 If you use this code in your work, please cite the following papers:
 
+```
 @article{2013toth,
   title={A novel framework for the quantitative analysis of high resolution transmission electron micrographs of soot {I}. {Improved} measurement of interlayer spacing},
   author={Toth, Pal and Palotas, Arpad B and Eddings, Eric G and Whitaker, Ross T and Lighty, JoAnn S},
@@ -28,9 +29,9 @@ If you use this code in your work, please cite the following papers:
   year={2011},
   publisher={Elsevier}
 }
-
+```
 In press:
-
+```
 @article{2021toth,
   title={Nanostructure quantification of turbostratic carbon by HRTEM image analysis: state of the art, biases, sensitivity and best practices},
   author={Toth, Pal},
@@ -41,12 +42,12 @@ In press:
   year={2021},
   publisher={Elsevier}
 }
-
-Version history:
+```
+## Version history:
 
 - 0.1 - 3/9/2021 - functioning Matlab code with minimal documentation
 
-Coming soon:
+## Coming soon:
 
 - functioning Python code
 - more documentation
