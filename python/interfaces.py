@@ -371,6 +371,3 @@ class Image:
                 domain=spatial
             )
         )
-
-
-im = Image.from_bitmap("D:\\projects\\oneauthor-review\\image.png")
