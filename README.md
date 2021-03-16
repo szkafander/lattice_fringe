@@ -49,3 +49,7 @@ If you use this code in your work, please cite the following papers:
 
 - functioning Python code
 - more documentation
+
+## Comments, concerns, questions
+
+For now, please submit these as Issues.
