@@ -33,10 +33,9 @@ If you use this code in your work, please cite the following papers:
 @article{2021toth,
   title={Nanostructure quantification of turbostratic carbon by HRTEM image analysis: state of the art, biases, sensitivity and best practices},
   author={Toth, Pal},
-  journal={Carbon (In Press)},
-  volume={},
-  number={},
-  pages={},
+  journal={Carbon},
+  volume={178},
+  pages={688--707},
   year={2021},
   publisher={Elsevier}
 }
