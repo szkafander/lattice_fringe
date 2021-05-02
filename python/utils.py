@@ -1,5 +1,7 @@
 import numpy as np
 
+from typing import List
+
 
 def overlay(*args, normalize=True) -> np.ndarray:
     if len(args) == 0:
@@ -28,3 +30,7 @@ def overlay(*args, normalize=True) -> np.ndarray:
             channel_ = channel_ / channel_.max()
         composite[:, :, k] = channel_
     return composite
+
+
+def direction_to_director(direction: float) -> List:
+    return [np.cos(direction), np.sin(direction)]
