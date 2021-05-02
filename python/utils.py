@@ -1,6 +1,6 @@
 import numpy as np
 
-from typing import List
+from typing import Tuple
 
 
 def overlay(*args, normalize=True) -> np.ndarray:
@@ -32,5 +32,31 @@ def overlay(*args, normalize=True) -> np.ndarray:
     return composite
 
 
-def direction_to_director(direction: float) -> List:
-    return [np.cos(direction), np.sin(direction)]
+def direction_to_director(direction: float) -> Tuple:
+    return np.cos(direction), np.sin(direction)
+
+
+def get_radial_component(f_x: np.ndarray, f_y: np.ndarray) -> np.ndarray:
+    return np.sqrt(f_x ** 2 + f_y ** 2)
+
+
+def get_impulse_response_components(
+        f_x: np.ndarray,
+        f_y: np.ndarray,
+        direction: float
+) -> Tuple[np.ndarray, np.ndarray]:
+    r = get_radial_component(f_x, f_y)
+    director = direction_to_director(direction)
+    uv = np.dstack((f_x, f_y))
+    uv = uv / np.dstack((r, r))
+    uv[np.isnan(uv)] = 0
+    d = np.sum(
+        uv * np.dstack((
+            np.ones(f_x.shape) * director[0],
+            np.ones(f_x.shape) * director[1]
+        )),
+        axis=-1
+    )
+    d[d < 0] = 0
+    d = d ** 2
+    return r, d
