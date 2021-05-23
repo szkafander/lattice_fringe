@@ -1,7 +1,10 @@
 import numpy as np
 
+from ..common import Image, Grid
 from ..interfaces import Filter, FilterBank
 from ..utils import get_impulse_response_components
+
+from typing import Collection, Optional, Tuple
 
 
 def impulse_response(
@@ -15,3 +18,61 @@ def impulse_response(
     radial_component = np.exp(-((r - center_frequency) / sigma) ** 2)
     radial_component[np.isnan(radial_component)] = 0
     return radial_component * d
+
+
+class CircularGaborFilter(Filter):
+
+    def __init__(self, center_frequency: float, bandwidth: float) -> None:
+        self.center_frequency = center_frequency
+        self.bandwidth = bandwidth
+        self._cache = None
+
+    @property
+    def coordinate(self) -> float:
+        return self.center_frequency
+
+    def get_kernels(
+            self,
+            image: Optional[Image] = None,
+            grid: Optional[Grid] = None
+    ) -> Tuple[np.ndarray, np.ndarray]:
+        pass
+
+    def get_response(self, image: Image) -> np.ndarray:
+        pass
+
+    def apply(self, image: Image) -> Image:
+        pass
+
+    def plot(self) -> None:
+        pass
+
+
+class CircularGaborFilterBank(FilterBank):
+
+    @property
+    def min_frequency(self) -> float:
+        return min(self.coordinates)
+
+    def get_responses(self, image: Image) -> Collection:
+        pass
+
+    def apply(self, image: Image) -> Image:
+        pass
+
+    def get_frequencies(
+            self,
+            image: Image
+    ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+        pass
+
+    def plot(self) -> None:
+        pass
+
+    @staticmethod
+    def create(
+            low_frequency: float = 1.0,
+            high_frequency: float = 5.0,
+            num_filters: int = 10
+    ) -> "CircularGaborFilterBank":
+        pass
