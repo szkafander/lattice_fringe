@@ -43,6 +43,16 @@ def _dispatch_resize_args(scale, old_size, new_size):
     return new_height, new_width
 
 
+class Cache:
+
+    def __init__(
+            self,
+            *attributes: str
+    ) -> None:
+        for attribute in attributes:
+            setattr(self, attribute, None)
+
+
 class Grid:
 
     def __init__(
@@ -155,6 +165,30 @@ class Grid:
             x_unit=f"1/{self.x_unit}",
             y_unit=f"1/{self.y_unit}",
             domain=frequency
+        )
+
+    def ift(self) -> "Grid":
+        xr = self.x_extent[1] - self.x_extent[0]
+        yr = self.y_extent[1] - self.y_extent[0]
+        x_name = self.x_name
+        y_name = self.y_name
+        x_unit = self.x_unit
+        y_unit = self.y_unit
+        if x_name[-10:] == " frequency":
+            x_name = x_name[1:]
+        if y_name[-10:] == " frequency":
+            y_name = y_name[1:]
+        if x_unit[:2] == "1/":
+            x_unit = x_unit[2:]
+        if y_unit[:2] == "1/":
+            y_unit = y_unit[2:]
+        return Grid(
+            np.linspace(0, xr, len(self.x_axis)),
+            np.linspace(0, yr, len(self.y_axis)),
+            x_name=x_name,
+            y_name=y_name,
+            x_unit=x_unit,
+            y_unit=y_unit
         )
 
     def resize(
