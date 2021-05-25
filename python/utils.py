@@ -60,3 +60,7 @@ def get_impulse_response_components(
     d[d < 0] = 0
     d = d ** 2
     return r, d
+
+
+def absolute_response(f_1: np.ndarray, f_2: np.ndarray) -> np.ndarray:
+    return np.abs(np.fft.ifft2(np.fft.fftshift(f_1 * f_2)))
