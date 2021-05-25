@@ -48,6 +48,9 @@ fb = filters.circular_gabor.CircularGaborFilterBank.create(...
     'spacing', ...      % distribute filter centers following an exponential series
     'exponential');
 
+% we resize the image so the computation is faster
+[freq, unc, magn] = fb.get_frequencies(im.resize(scale), 'mode', 'strongest_vote');
+
 figure('Units', 'normalized', 'Position', [0.1 0.1 0.7 0.8]);
 
 subplot(2, 2, 1);
@@ -68,8 +71,6 @@ set(gca, 'XTick', [], 'YTick', []);
 title('modulation strength');
 
 subplot(2, 2, 4);
-% we resize the image so the computation is faster
-[freq, unc, magn] = fb.get_frequencies(im.resize(scale), 'mode', 'strongest_vote');
 % we are only interested in the spacing within the sample mask
 [freqs, bins] = histwc(1 ./ freq(imresize(mask, scale)), magn(imresize(mask, scale)), dbins);
 bar(bins, freqs);
