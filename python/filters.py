@@ -3,7 +3,12 @@ import matplotlib.pyplot as pl
 
 from common import Cache, Image, Grid, spatial
 from interfaces import Filter, FilterBank
-from utils import get_impulse_response_components, absolute_response, overlay
+from utils import (
+    get_impulse_response_components,
+    absolute_response,
+    overlay,
+    uniquetol
+)
 
 from typing import Collection, Optional, Tuple
 
@@ -121,9 +126,30 @@ class LogGaborFilter(Filter):
 
 class LogGaborFilterBank(FilterBank):
 
+    def __init__(self, filters) -> None:
+        self.filters = filters
+        frequencies = list(sorted(self.coordinates))
+        frequency_multipliers = [frequencies[k+1] / frequencies[k] for k
+                                 in np.arange(1, len(frequencies))]
+        frequency_multiplier = uniquetol(np.array(frequency_multipliers), 1e-5)
+        if len(frequency_multiplier) > 1:
+            raise ValueError("The frequency multiplier cannot be inferred. "
+                             "Consider using the 'create' method to "
+                             "instantiate this class.")
+        super(LogGaborFilterBank, self).__init__(
+            filters,
+            ("center_frequency",)
+        )
+        self.frequency_multiplier = frequency_multiplier
+
+    @property
+    def frequencies(self) -> Collection:
+        """ Alias for coordinates. """
+        return self.coordinates
+
     @property
     def min_frequency(self) -> float:
-        return min(self.coordinates)
+        return min(self.frequencies)
 
     def get_responses(self, image: Image) -> Collection:
         pass

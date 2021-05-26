@@ -64,3 +64,13 @@ def get_impulse_response_components(
 
 def absolute_response(f_1: np.ndarray, f_2: np.ndarray) -> np.ndarray:
     return np.abs(np.fft.ifft2(np.fft.fftshift(f_1 * f_2)))
+
+
+def uniquetol(array: np.ndarray, tolerance: float) -> np.ndarray:
+    """ Adapted with corrections from https://stackoverflow.com/questions/
+    37847053/uniquify-an-array-list-with-a-tolerance-in-python-uniquetol-
+    equivalent. Use only for small 1D arrays. """
+    eps = np.finfo(array.dtype).resolution
+    d = np.abs(array[:, np.newaxis] - array)
+    inds = ~(np.triu(d <= tolerance + 2 * eps, 1))
+    return array[inds.all(0)]
