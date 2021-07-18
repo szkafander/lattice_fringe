@@ -1,6 +1,6 @@
 # Matlab usage
 
-- Make sure to add the "thirdparty" folder to the Matlab path.
+- Make sure to add the "thirdparty" folder (with all its subfolders) to the Matlab path.
 - Open example.m. Change the "fn" variable so that it correctly points to the test image in the "data" folder.
 - Run example.m.
 
