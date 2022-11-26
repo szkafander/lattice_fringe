@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as pl
 
 from common import Cache, Image, Grid, spatial
-from interfaces import Filter, FilterBank
+from lattice_fringe.interfaces import Filter, FilterBank
 from utils import (
     get_impulse_response_components,
     absolute_response,
@@ -126,11 +126,11 @@ class LogGaborFilter(Filter):
 
 class LogGaborFilterBank(FilterBank):
 
-    def __init__(self, filters) -> None:
+    def __init__(self, filters: Collection[LogGaborFilter]) -> None:
         self.filters = filters
         frequencies = list(sorted(self.coordinates))
         frequency_multipliers = [frequencies[k+1] / frequencies[k] for k
-                                 in np.arange(1, len(frequencies))]
+                                 in np.arange(0, len(frequencies) - 1)]
         frequency_multiplier = uniquetol(np.array(frequency_multipliers), 1e-5)
         if len(frequency_multiplier) > 1:
             raise ValueError("The frequency multiplier cannot be inferred. "
@@ -152,16 +152,62 @@ class LogGaborFilterBank(FilterBank):
         return min(self.frequencies)
 
     def get_responses(self, image: Image) -> Collection:
-        pass
+        return [f.get_response(image) for f in self.filters]
 
     def apply(self, image: Image) -> Image:
-        pass
+        responses = self.get_responses(image)
+        return Image(np.dstack(responses), grid=image.grid)
 
     def get_frequencies(
             self,
-            image: Image
+            image: Image,
+            mode: str = "strongest_vote"
     ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
-        pass
+        responses = self.get_responses(image)
+        responses = np.dstack(responses)
+        center_frequencies = self.frequencies
+
+        if mode == "weighted":
+            max_response = np.max(responses, axis=-1)
+            term_1 = (self.min_frequency
+                      * (1 / np.sum(responses[:, :, :-1], axis=-1)))
+            term_2 = np.zeros(responses.shape[:-1])
+            for i in range(responses.shape[-1] - 1):
+                term_2 = (term_2
+                          + self.frequency_multiplier ** ((i - 1) + 0.5)
+                          * responses[:, :, i+1])
+            frequencies = term_1 * term_2
+            channels = responses ** 2
+            term_1 = 1 / np.sum(channels[:, :, :-1], axis=-1)
+            term_2 = np.zeros(responses.shape[:-1])
+            for i in range(responses.shape[-1] - 1):
+                term_2 = (term_2
+                          + responses[:, :, i] ** 2
+                          * self.frequency_multiplier ** ((i - 1) + 0.5)
+                          * responses[:, :, i+1] / responses[:, :, i]
+                          - frequencies) ** 2
+            certainty = 1 / (1 + term_1 * term_2)
+
+        elif mode == "strongest_vote":
+            max_response = np.max(responses, axis=-1)
+            max_ind = np.argmax(responses, axis=-1)
+            neighbor_ind = max_ind + 1
+            neighbor_ind[neighbor_ind > responses.shape[-1]] = \
+                neighbor_ind[neighbor_ind > responses.shape[-1]] - 1
+            this_freqs = center_frequencies[max_ind]
+            neighbor_freqs = center_frequencies[neighbor_ind]
+            mean_freqs = np.sqrt(this_freqs * neighbor_freqs)
+            N = int(np.prod(responses.shape[:-1]))
+            idx = np.arange(N) + (neighbor_ind[0:N] - 1) * N
+            neighbor_responses = np.reshape(responses[idx],
+                                            responses.shape[:-1])
+            frequencies = mean_freqs * max_response / neighbor_responses
+            certainty = max_response
+
+        else:
+            raise ValueError("The argument 'mode' must be 'weighted' or "
+                             "'strongest_vote'.")
+        return frequencies, certainty, max_response
 
     def plot(self) -> None:
         pass
@@ -172,7 +218,13 @@ class LogGaborFilterBank(FilterBank):
             high_frequency: float = 5.0,
             num_filters: int = 10
     ) -> "LogGaborFilterBank":
-        pass
+        r_multiplier = ((high_frequency / low_frequency)
+                        ** (1 / (num_filters - 1)))
+        bandwidth = 2 * np.sqrt(2 / np.log(2)) * np.sqrt(np.log(r_multiplier))
+        coordinates = [r_multiplier ** (i - 1) * low_frequency for i
+                       in range(num_filters)]
+        filters = [LogGaborFilter(c, bandwidth) for c in coordinates]
+        return LogGaborFilterBank(filters)
 
 
 class CircularGaborFilter(Filter):

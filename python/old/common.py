@@ -5,11 +5,39 @@ import utils
 import warnings
 
 from imageio import imread
-from scipy.fft import fft2
+from scipy.fft import fft2, fftshift, ifft2
 from skimage.color import rgb2gray, rgba2rgb
 from skimage.transform import resize
 
 from typing import Optional, Tuple, Union
+
+
+class LatticeFringeGridError(Exception):
+    pass
+
+
+class LatticeFringeGridSpecError(LatticeFringeGridError):
+    pass
+
+
+class LatticeFringeGridFTError(LatticeFringeGridError):
+    pass
+
+
+class LatticeFringeImageError(Exception):
+    pass
+
+
+class LatticeFringeImageSpecError(LatticeFringeImageError):
+    pass
+
+
+class LatticeFringeImageFTError(LatticeFringeImageError):
+    pass
+
+
+class LatticeFringeImageIOError(LatticeFringeImageError):
+    pass
 
 
 class Domain:
@@ -17,11 +45,15 @@ class Domain:
 
 
 class Spatial(Domain):
-    pass
+
+    def __repr__(self):
+        return "spatial"
 
 
 class Frequency(Domain):
-    pass
+
+    def __repr__(self):
+        return "frequency"
 
 
 spatial = Spatial()
@@ -29,14 +61,16 @@ frequency = Frequency()
 
 
 def _dispatch_resize_args(scale, old_size, new_size):
-    if float is None and new_size is None:
+    if scale is None and new_size is None:
         raise ValueError("At least one of 'scale' and 'new_size' must be "
                          "specified.")
+    if scale is not None:
+        scale = float(scale)
     if isinstance(scale, float):
         scale = [scale, scale]
     if new_size is None:
-        new_height = np.round(old_size[0] * scale).astype(int)
-        new_width = np.round(old_size[1] * scale).astype(int)
+        new_height = np.round(old_size[0] * scale[0]).astype(int)
+        new_width = np.round(old_size[1] * scale[1]).astype(int)
     else:
         new_height = new_size[0]
         new_width = new_size[1]
@@ -66,8 +100,8 @@ class Grid:
             domain: Domain = spatial
     ) -> None:
         if x_coords.ndim not in [1, 2] or y_coords.ndim not in [1, 2]:
-            raise ValueError("x_coords and y_coords must be 1- or "
-                             "2-dimensional arrays.")
+            raise LatticeFringeGridSpecError("x_coords and y_coords must be 1-"
+                                             " or 2-dimensional arrays.")
         if x_coords.ndim == 1 and y_coords.ndim == 1:
             x_coords, y_coords = np.meshgrid(x_coords, y_coords)
         self.x_coords = x_coords
@@ -80,7 +114,7 @@ class Grid:
 
     def __eq__(self, other: "Grid") -> bool:
         if not isinstance(other, Grid):
-            raise ValueError("Grids can only be compared to Grids.")
+            return False
         with warnings.catch_warnings():
             warnings.filterwarnings("ignore")
             try:
@@ -153,8 +187,9 @@ class Grid:
 
     def ft(self) -> "Grid":
         if self.domain == frequency:
-            raise ValueError("This grid is already frequency-domain. Fourier "
-                             "Transforming is not meaningful.")
+            raise LatticeFringeGridFTError("This grid is already "
+                                           "frequency-domain. Fourier "
+                                           "transforming is not meaningful.")
         n_x = self.width
         n_y = self.height
         return Grid(
@@ -214,7 +249,7 @@ class Grid:
         axes.set_ylabel(
             self.y_name + f", {self.y_unit}" if self.y_unit else "")
 
-    def show(self) -> None:
+    def plot(self) -> None:
         xx = self.x_coords / np.abs(self.x_coords).max()
         yy = self.y_coords / np.abs(self.y_coords).max()
         c = xx
@@ -236,8 +271,8 @@ class Image:
     ) -> None:
         try:
             if channels.ndim not in (2, 3):
-                raise ValueError("Channels must be a 2- or 3-dimensional numpy"
-                                 "array.")
+                raise LatticeFringeImageSpecError("Channels must be a 2- or "
+                                                  "3-dimensional numpy array.")
         except AttributeError:
             raise ValueError("Channels must be a 2- or 3-dimensional numpy "
                              "array.")
@@ -254,8 +289,8 @@ class Image:
         # check grid-channels consistency
         else:
             if self.width != grid.width or self.height != grid.height:
-                raise ValueError("Channel and grid dimensions are not "
-                                 "consistent.")
+                raise LatticeFringeImageSpecError("Channel and grid dimensions"
+                                                  " are not consistent.")
         self.grid = grid
 
     def __getitem__(self, item) -> "Image":
@@ -282,6 +317,10 @@ class Image:
         return self.channels.shape[1]
 
     @property
+    def size(self) -> Tuple[int, int]:
+        return self.channels.shape[:-1]
+
+    @property
     def num_channels(self) -> int:
         return self.channels.shape[2]
 
@@ -289,7 +328,7 @@ class Image:
     def domain(self) -> Domain:
         return self.grid.domain
 
-    def show(self) -> None:
+    def plot(self) -> None:
         num_channels = self.num_channels
         extent = [*self.grid.x_extent, *self.grid.y_extent]
         # spatial image
@@ -320,7 +359,8 @@ class Image:
             scale: Optional[Union[float, Tuple[float]]] = None,
             new_size: Optional[Tuple[int]] = None
     ) -> "Image":
-        new_height, new_width = _dispatch_resize_args(scale, new_size)
+        new_height, new_width = _dispatch_resize_args(scale, self.size,
+                                                      new_size)
         return Image(
             resize(self.channels, (new_height, new_width), order=1),
             self.grid.resize(new_size=(new_height, new_width))
@@ -328,18 +368,32 @@ class Image:
 
     def ft(self) -> "Image":
         if self.domain == frequency:
-            raise ValueError("The Fourier Transform is only meaningful for "
-                             "spatial images.")
+            raise LatticeFringeImageFTError("The Fourier Transform is only "
+                                            "meaningful for spatial images.")
         if self.num_channels > 1:
-            raise ValueError("Fourier Transforming is only supported for "
-                             "single-channel images.")
+            raise LatticeFringeImageFTError("Fourier Transforming is only "
+                                            "supported for single-channel "
+                                            "images.")
         return Image(
-            fft2(self.channels[:, :, 0]),
+            fftshift(fft2(self.channels[:, :, 0])),
             self.grid.ft()
         )
 
     def ift(self) -> "Image":
-        pass
+        if self.domain == spatial:
+            raise LatticeFringeImageFTError("The image is already spatial "
+                                            "domain. Inverse Fourier "
+                                            "transformation is not "
+                                            "meaningful.")
+        if self.num_channels == 1:
+            transformed = np.real(ifft2(fftshift(self.channels[:, :, 0])))
+        else:
+            transformed = np.zeros((self.height, self.width,
+                                    self.num_channels))
+            for i in range(self.num_channels):
+                transformed[:, :, i] = np.real(ifft2(fftshift(
+                    self.channels[:, :, i])))
+        return Image(transformed, grid=self.grid.ift())
 
     @staticmethod
     def from_bitmap(
@@ -359,9 +413,10 @@ class Image:
         shape = channels.shape
         num_dims = channels.ndim
         if num_dims > 3 or num_dims < 2:
-            raise ValueError(f"Multi-dimensional images and scalar series "
-                             f"are not supported. The number of dimensions "
-                             f"was {num_dims}.")
+            raise LatticeFringeImageIOError("Multi-dimensional images and "
+                                            "scalar series are not "
+                                            "supported. The number of "
+                                            f"dimensions was {num_dims}.")
         if num_dims == 2:
             num_channels = 1
         else:
@@ -370,8 +425,15 @@ class Image:
         if grayscale:
             if num_channels == 4:
                 channels = rgb2gray(rgba2rgb(channels))[:, :, np.newaxis]
-            else:
+            elif num_channels == 3:
                 channels = rgb2gray(channels)[:, :, np.newaxis]
+            elif num_channels == 1:
+                channels = channels[:, :, np.newaxis]
+            else:
+                raise LatticeFringeImageIOError("Image channels must be at "
+                                                "most 4-dimensional. The "
+                                                "passed channels were "
+                                                f"{num_channels}-dimensional")
         # convert to grayscale if image channels are same
         # this can occur when reading grayscale images that were saved as color
         if num_channels == 3:

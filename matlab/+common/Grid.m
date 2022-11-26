@@ -1,7 +1,5 @@
 classdef Grid
-    
     properties
-
         % coordinates as {X, Y}, both are meshgrid-type
         % the two arrays must have the same size
         XGrid
@@ -30,13 +28,11 @@ classdef Grid
         % units, str or 2-cellstr
         XUnit
         YUnit
-        
+
         Domain
-        
     end
     
     methods
-        
         function obj = Grid(varargin)
             % ways to instantiate a grid:
             %
@@ -47,7 +43,6 @@ classdef Grid
             % 2. pass XAxis and YAxis:
             %   - coordinates, origin, extents, deltas, size are inferred
             %   - optionally pass units
-            
             p = inputParser;
             
             addOptional(p, 'x_grid', [], @(x)ismatrix(x) && isnumeric(x));
@@ -71,35 +66,28 @@ classdef Grid
             % extents, deltas, size and abscissae are inferred
             % units are optional
             if ~isempty(x_grid) && ~isempty(y_grid)
-                
                 if any(cellfun(@(x)~isempty(p.Results.(x)), ...
                         {'x_axis', 'y_axis'}))
                     error('If grids are passed, axes must not be.');
                 end
-            
             % method 2
             % axes provided
             % grids, extents, deltas and size are inferred
             % units are optional
             elseif ~isempty(p.Results.x_axis) && ~isempty(p.Results.y_axis)
-                
                 if any(cellfun(@(x)~isempty(p.Results.(x)), ...
                         {'x_grid', 'y_grid'}))
                     error('If axes are passed, grids must not be.');
                 end
-                
                 % create grid
                 [x_grid, y_grid] = meshgrid( ...
                     p.Results.x_axis, ...
                     p.Results.y_axis);
-                
             else
-                
                 error(['There are two ways to instantiate a grid: 1. ' ...
                     'pass x_grid and y_grid (optional arguments) or 2.' ...
                     ' pass x_axis and y_axis (key-value pairs). The ' ...
                     'passed arguments did not match either pattern.']);
-                
             end
             
             [x_extent, y_extent, x_delta, y_delta, coord_size] = ...
@@ -119,18 +107,12 @@ classdef Grid
             obj.XUnit = p.Results.x_unit;
             obj.YUnit = p.Results.y_unit;
             obj.Domain = p.Results.domain;
-            
         end
         
         function frequency_grid = ft(obj)
             % returns a Grid that is the Fourier transform of the parent
-            
-            % xr = obj.XExtent(2) - obj.XExtent(1);
-            % yr = obj.YExtent(2) - obj.YExtent(1);
-            
             n_x = numel(obj.XAxis);
             n_y = numel(obj.YAxis);
-            
             frequency_grid = common.Grid( ...
                 'x_axis', ( - n_x / 2 : n_x / 2 - 1) ./ obj.XDelta ./ n_x, ...
                 'y_axis', ( - n_y / 2 : n_y / 2 - 1) ./ obj.YDelta ./ n_y, ...
@@ -139,12 +121,10 @@ classdef Grid
                 'x_unit', ['1/' obj.XUnit], ...
                 'y_unit', ['1/' obj.YUnit], ...
                 'domain', common.Domain.Frequency);
-            
         end
         
         function spatial_grid = ift(obj)
             % returns a Grid that is the Fourier transform of the parent
-            
             xr = obj.XExtent(2) - obj.XExtent(1);
             yr = obj.YExtent(2) - obj.YExtent(1);
             
@@ -174,11 +154,9 @@ classdef Grid
                 'y_name', y_name, ...
                 'x_unit', x_unit, ...
                 'y_unit', y_unit);
-            
         end
         
         function resized = resize(obj, scale)
-            
             n_x = ceil(numel(obj.XAxis) * scale);
             n_y = ceil(numel(obj.YAxis) * scale);
             x_axis = linspace(obj.XExtent(1), obj.XExtent(2), n_x);
@@ -187,12 +165,10 @@ classdef Grid
                 'x_name', obj.XName, 'y_name', obj.YName, ...
                 'x_unit', obj.XUnit, 'y_unit', obj.YUnit, ...
                 'domain', obj.Domain);
-            
         end
 
         function plot(obj)
             % draws the unit vectors and sets the axis limits
-            
             composite = zeros(obj.Size(1), obj.Size(2), 3);
             xx = obj.XGrid ./ max(abs(obj.XGrid(:)));
             yy = obj.YGrid ./ max(abs(obj.YGrid(:)));
@@ -218,19 +194,13 @@ classdef Grid
             
             xlabel([obj.XName x_unit]);
             ylabel([obj.YName y_unit]);
-            
         end
         
         function is_equal = eq(obj, other)
-            
             if isempty(other)
-                
                 is_equal = false;
-                
             else
-            
                 domains_equal = obj.Domain == other.Domain;
-
                 try
                     x_grid_equal = obj.XGrid == other.XGrid;
                     y_grid_equal = obj.YGrid == other.YGrid;
@@ -238,14 +208,10 @@ classdef Grid
                 catch
                     grids_equal = false;
                 end
-
                 units_equal = strcmp(obj.XUnit, other.XUnit) ...
                     && strcmp(obj.YUnit, other.YUnit);
-
                 is_equal = domains_equal && grids_equal && units_equal;
-                
             end
-            
         end
     end
     
@@ -253,7 +219,6 @@ classdef Grid
         
         function [x_extent, y_extent, x_delta, y_delta, coord_size] = ...
                 infer_props(x_grid, y_grid)
-            
             % check grid dimensions
             x_dims = ndims(x_grid);
             y_dims = ndims(y_grid);
@@ -263,13 +228,11 @@ classdef Grid
             if y_dims ~= 2
                 error('y_grid must be a 2D array.');
             end
-            
             % check grid sizes
             if ~all(size(x_grid) == size(y_grid))
                 error(['The sizes of x_grid and y_grid (passed or ' ...
                     'inferred) must be the same.']);
             end
-            
             % check grid regularity
             x_delta = diff(x_grid, 1, 2);
             y_delta = diff(y_grid, 1, 1);
@@ -283,16 +246,11 @@ classdef Grid
                 error(['y_grid must be regular, i.e., diff(y_grid, ' ...
                     '1, 2) must have a single unique value.']);
             end
-            
             % set extents
             x_extent = [min(x_grid(:)) max(x_grid(:))];
             y_extent = [min(y_grid(:)) max(y_grid(:))];
-            
             % set size
             coord_size = size(x_grid);
-            
         end
-        
     end
-    
 end

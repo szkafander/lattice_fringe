@@ -14,14 +14,12 @@ classdef  Segment
     end
     
     methods
-        
         function obj = Segment(index, endpoints, parent)
             obj.Index = index;
             obj.Endpoints = endpoints;
             obj.Parent = parent;
             obj.A = endpoints(1, :);
             obj.B = endpoints(2, :);
-            
             obj.VectorForm = obj.Endpoints([1 3 2 4]);
             obj.Orientation = obj.calc_orientation();
             obj.Centroid = obj.calc_centroid();

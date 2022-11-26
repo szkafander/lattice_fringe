@@ -1,10 +1,6 @@
 classdef Domain < logical
-    
-    enumeration
-        
+    enumeration   
         Spatial     (0)
         Frequency   (1)
-        
     end
-    
 end

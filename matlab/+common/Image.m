@@ -1,25 +1,18 @@
 classdef Image
-    
     properties
-        
         Grid
         Channels
         Width
         Height
         NumChannels
-        
     end
     
     properties (Dependent)
-        
         Domain
-        
     end
     
     methods
-        
         function obj = Image(channels, varargin)
-            
             p = inputParser;
             addOptional(p, 'grid', [], @(x)isa(x, 'common.Grid'));
             parse(p, varargin{:});
@@ -59,21 +52,16 @@ classdef Image
             
             obj.Grid = grid;
             obj.Channels = channels;
-            
         end
         
         function image = get_channel(obj, channel_inds)
-            
             image = common.Image( ...
                 obj.Channels(:, :, channel_inds), ...
                 obj.Grid);
-            
         end
         
         function domain = get.Domain(obj)
-            
             domain = obj.Grid.Domain;
-            
         end
         
         function plot(obj, varargin)
@@ -86,7 +74,6 @@ classdef Image
             %   - frequency spectra (frequency, 1-channel, complex)
             %   - filtered spectra (frequency, n-channel, complex)
             %   - filtered images (spatial, n-channel, complex)
-            
             p = inputParser;
             addParameter(p, 'log', true, @islogical);
             parse(p, varargin{:});
@@ -94,23 +81,17 @@ classdef Image
             log_ = p.Results.log;
             
             switch obj.NumChannels
-                
                 case 1
-                    
                     % 1-channel, real -> grayscale
                     if isreal(obj.Channels)
-                        
                         imagesc( ...
                             obj.Grid.XAxis, ...
                             obj.Grid.YAxis, ...
                             mat2gray(obj.Channels));
                         colormap gray;
-                        
                     else
-                        
                         % frequency, 1-channel, complex -> spectrum
                         if obj.Domain == common.Domain.Frequency
-                            
                             re = abs(real(obj.Channels));
                             im = abs(imag(obj.Channels));
                             if log_
@@ -141,10 +122,8 @@ classdef Image
                                 obj.Grid.XAxis - obj.Grid.XDelta / 2, ...
                                 obj.Grid.YAxis - obj.Grid.YDelta / 2, ...
                                 composite);
-                            
                         % spatial, 1-channel, complex -> filter response
                         else
-                            
                             re = real(obj.Channels);
                             im = imag(obj.Channels);
                             mag = sqrt(re.^2 + im.^2);
@@ -166,30 +145,21 @@ classdef Image
                                 obj.Grid.XAxis - obj.Grid.XDelta / 2, ...
                                 obj.Grid.YAxis - obj.Grid.YDelta / 2, ...
                                 composite);
-                            
                         end
-                        
                     end
-                    
                 case 2
-                    
                     % if real, just show as two-color image
                     if isreal(obj.Channels)
-                        
                         composite = zeros(size(obj.Height, obj.Width, 3));
                         composite(:, :, 1:2) = obj.Channels;
-                        
                         composite = composite - min(composite(:));
-                        
                         imagesc( ...
                             obj.Grid.XAxis, ...
                             obj.Grid.YAxis, ...
                             composite ./ max(composite(:)));
-                        
                     % if complex, assume that it's two filter responses
                     % show only the magnitudes
                     else
-                        
                         response_1 = abs(obj.Channels(:,:,1));
                         response_2 = abs(obj.Channels(:,:,2));
                         
@@ -207,26 +177,19 @@ classdef Image
                             obj.Grid.XAxis - obj.Grid.XDelta / 2, ...
                             obj.Grid.YAxis - obj.Grid.YDelta / 2, ...
                             composite);
-                        
                     end
-                    
                 case 3
-                    
                     % if real, show as RGB image
                     if isreal(obj.Channels)
-                        
                         imagesc( ...
                             obj.Grid.XAxis, ...
                             obj.Grid.YAxis, ...
                             double(obj.Channels) ...
                                 ./ max(double(obj.Channels(:))));
-                        
                     % if complex
                     else
-                        
                         % if complex and frequency domain, plot as spectrum
                         if obj.Domain == common.Domain.Spatial
-                            
                             response_1 = abs(obj.Channels(:,:,1));
                             response_2 = abs(obj.Channels(:,:,2));
 
@@ -244,10 +207,8 @@ classdef Image
                                 obj.Grid.XAxis - obj.Grid.XDelta / 2, ...
                                 obj.Grid.YAxis - obj.Grid.YDelta / 2, ...
                                 composite);
-                        
                         % otherwise plot as response magnitude
                         else
-
                             mag_1 = log(abs(obj.Channels(:,:,1)));
                             mag_2 = log(abs(obj.Channels(:,:,2)));
                             mag_3 = log(abs(obj.Channels(:,:,3)));
@@ -273,13 +234,9 @@ classdef Image
                                 obj.Grid.XAxis - obj.Grid.XDelta / 2, ...
                                 obj.Grid.YAxis - obj.Grid.YDelta / 2, ...
                                 composite);
-                            
                         end
-                        
                     end
-                    
             end
-            
             if isempty(obj.Grid.XUnit)
                 x_unit = '';
             else
@@ -293,11 +250,9 @@ classdef Image
             axis image;
             xlabel([obj.Grid.XName x_unit]);
             ylabel([obj.Grid.YName y_unit]);
-            
         end
         
         function resized = resize(obj, scale)
-            
             if scale == 1
                 resized = obj;
             else
@@ -305,11 +260,9 @@ classdef Image
                 resized_grid = obj.Grid.resize(scale);
                 resized = common.Image(resized_channels, 'grid', resized_grid);
             end
-            
         end
         
         function frequency_image = ft(obj)
-            
             if obj.Domain == common.Domain.Frequency
                 warning(['The image is already in the frequency ' ...
                     'domain. Fourier transformation might not produce ' ...
@@ -317,31 +270,24 @@ classdef Image
             end
             
             if obj.NumChannels == 1
-                
                 transformed = fftshift(fft2(double(obj.Channels)));
-                
             else
-                
                 transformed = zeros( ...
                     obj.Height, ...
                     obj.Width, ...
                     obj.NumChannels);
-                
                 for i = 1:obj.NumChannels
                     transformed(:,:,i) = ...
                         fftshift(fft2(double(obj.Channels(:,:,i))));
                 end
-                
             end
-            
+
             frequency_image = common.Image( ...
                 transformed, ...
                 'grid', obj.Grid.ft());
-            
         end
         
         function spatial_image = ift(obj)
-            
             if obj.Domain == common.Domain.Spatial
                 warning(['The image is already in the spatial ' ...
                     'domain. Inverse Fourier transformation might not ' ...
@@ -349,41 +295,30 @@ classdef Image
             end
             
             if obj.NumChannels == 1
-                
                 transformed = ifft2(fftshift(obj.Channels));
-            
             else
-                
                 transformed = zeros( ...
                     obj.Height, ...
                     obj.Width, ...
                     obj.NumChannels);
-                
                 for i = 1:obj.NumChannels
                     transformed(:,:,i) = ...
                         ifft2(fftshift(obj.Channels(:,:,i)));
                 end
-                
             end
             
             spatial_image = common.Image( ...
                 transformed, ...
                 'grid', obj.Grid.ift());
-            
         end
         
         function filtered_image = filter(obj, filter_bank)
-            
             filtered_image = filter_bank.apply(obj);
-            
         end
-        
     end
     
     methods (Static)
-        
         function check_grid_channels_consistency(grid, channels)
-            
         end
         
         function image = from_bitmap(path, varargin)
@@ -409,7 +344,6 @@ classdef Image
             %   - if set to true (this is the default), the image will be
             %     converted to grayscale and will have a single channel. if
             %     set to false, all read channels will be kept.
-            
             p = inputParser;
             addParameter(p, 'scale', 1.0, @isscalar);
             addParameter(p, 'x_scale', [], @isscalar);
@@ -440,7 +374,6 @@ classdef Image
             end
             
             if p.Results.grayscale
-                
                 % if grayscale but has 3 channels, keep only first channel
                 if num_channels == 3
                     if all(all(channels(:,:,1) == channels(:,:,2))) ...
@@ -448,11 +381,9 @@ classdef Image
                         channels = rgb2gray(channels);
                     end
                 end
-                
                 if size(channels, 3) ~= 1
                     channels = rgb2gray(channels);
                 end
-                
             end
             
             % infer grid
@@ -498,9 +429,6 @@ classdef Image
                 'y_unit', y_unit);
             
             image = common.Image(channels, grid);
-            
         end
-        
     end
-    
 end

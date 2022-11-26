@@ -1,28 +1,21 @@
 classdef LogGaborFilterBank < interfaces.FilterBank
-    
     properties
-        
         Abscissae
         Filters
         FrequencyMultiplier
-    
     end
     
     properties (Dependent)
-        
         Coordinates
         MinFrequency
-    
     end
     
     methods
-        
         function obj = LogGaborFilterBank(filters)
             % there is only a single log-Gabor abscissa: radial frequency.
             % otherwise, two orthogonal frames are used.
             % don't use the constructor to instantiate this class - use the
             % create method instead
-            
             frequencies = sort(cellfun(@(x)x.CenterFrequency, filters));
             frequency_multipliers = zeros(numel(frequencies) - 1, 1);
             for i = 1:numel(frequencies) - 1
@@ -39,23 +32,17 @@ classdef LogGaborFilterBank < interfaces.FilterBank
             obj.Abscissae = {'center_frequency'};
             obj.Filters = filters;
             obj.FrequencyMultiplier = frequency_multiplier;
-        
         end
         
         function coordinates = get.Coordinates(obj)
-            
             coordinates = cellfun(@(x)x.CenterFrequency, obj.Filters);
-            
         end
         
         function min_frequency = get.MinFrequency(obj)
-            
             min_frequency = min(obj.Coordinates);
-            
         end
         
         function plot(obj, varargin)
-            
             p = inputParser;
             addParameter(p, 'image', [], @(x)isa(x, 'common.Image'));
             parse(p, varargin{:});
@@ -63,37 +50,29 @@ classdef LogGaborFilterBank < interfaces.FilterBank
             image = p.Results.image;
             
             for i = 1:obj.NumFilters
-                
                 if i == 1                    
                     obj.Filters{i}.plot('image', image);                    
                 else                    
                     obj.Filters{i}.plot('image', image, 'show_image', false);                    
                 end
-                
             end
-            
         end
         
         function responses = get_responses(obj, image)
-            
             responses = cellfun( ...
                 @(x)x.get_response(image), ...
                 obj.Filters, ...
                 'UniformOutput', false);
-            
         end
         
         function response = apply(obj, image)
-            
             responses = obj.get_responses(image);
             response = common.Image( ...
                 cat(3, responses{:}), ...
                 'grid', image.Grid);
-            
         end
         
         function [frequencies, certainty, max_response] = get_frequencies(obj, image, varargin)
-            
             p = inputParser;
             addParameter(p, 'mode', 'strongest_vote', @isstr);
             parse(p, varargin{:});
@@ -104,9 +83,7 @@ classdef LogGaborFilterBank < interfaces.FilterBank
             center_frequencies = cellfun(@(x)x.CenterFrequency, obj.Filters);
             
             switch mode
-                
                 case 'weighted'
-                    
                     % according to Westin's thesis
                     % frequency
                     max_response = max(responses, [], 3);
@@ -132,9 +109,7 @@ classdef LogGaborFilterBank < interfaces.FilterBank
                             - frequencies) .^ 2;
                     end
                     certainty = 1 ./ (1 + term_1 .* term_2);
-            
                 case 'strongest_vote'
-
                     % find maximum response index
                     [max_response, max_ind] = max(responses, [], 3);
 
@@ -154,15 +129,11 @@ classdef LogGaborFilterBank < interfaces.FilterBank
                     frequencies = mean_freqs .* max_response ./ neighbor_responses;
 
                     certainty = max_response;
-            
             end
-            
         end
-        
     end
     
     methods (Static)
-        
         function filter_bank = create(varargin)
            % creates a log-Gabor filter bank. sets up abscissae based on
            % filter bank limits.
@@ -174,7 +145,6 @@ classdef LogGaborFilterBank < interfaces.FilterBank
            %        this will calculate the relative bandwidths and
            %        populate the filter bank with filters spaced according
            %        to 'spacing'
-           
            p = inputParser;
            addOptional(p, 'low_frequency', 1, @isscalar);
            addOptional(p, 'high_frequency', 5, @isscalar);
@@ -200,10 +170,6 @@ classdef LogGaborFilterBank < interfaces.FilterBank
                'UniformOutput', false);
            
            filter_bank = filters.loggabor.LogGaborFilterBank(filters_);
-           
         end
-        
     end
-    
 end
-            

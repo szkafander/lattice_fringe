@@ -1,50 +1,35 @@
 classdef CircularGaborFilterBank < interfaces.FilterBank
-    
     properties
-        
         Abscissae
         Filters
         Selectivity
-    
     end
     
     properties (Dependent)
-        
         Coordinates
         MinFrequency
         MaxFrequency
-    
     end
     
     methods
-        
         function obj = CircularGaborFilterBank(filters)
-            
             obj.Abscissae = {'center_frequency'};
             obj.Filters = filters;
-        
         end
         
         function coordinates = get.Coordinates(obj)
-            
             coordinates = cellfun(@(x)x.CenterFrequency, obj.Filters);
-            
         end
         
         function min_frequency = get.MinFrequency(obj)
-            
             min_frequency = min(obj.Coordinates);
-            
         end
         
         function max_frequency = get.MaxFrequency(obj)
-            
             max_frequency = max(obj.Coordinates);
-            
         end
         
         function plot(obj, varargin)
-            
             p = inputParser;
             addParameter(p, 'mode', 'image', @isstr);
             addParameter(p, 'image', [], @(x)isa(x, 'common.Image'));
@@ -54,48 +39,36 @@ classdef CircularGaborFilterBank < interfaces.FilterBank
             image = p.Results.image;
             
             if strcmp(mode, 'image')
-                
                 for i = 1:obj.NumFilters
-
                     if i == 1                    
                         obj.Filters{i}.plot('image', image);                    
                     else
                         obj.Filters{i}.plot('image', image, 'show_image', false);                    
                     end
-
                 end
-                
             elseif strcmp(mode, '1d')
-                
                 f = linspace(obj.MinFrequency, obj.MaxFrequency, 1000);
                 for i = 1:obj.NumFilters
                     plot(f, exp( - ((f - obj.Filters{i}.CenterFrequency) / obj.Filters{i}.Sigma) .^ 2)); hold on;
                 end
-                
-            end
-            
+            end 
         end
         
         function responses = get_responses(obj, image)
-            
             responses = cellfun( ...
                 @(x)x.get_response(image), ...
                 obj.Filters, ...
                 'UniformOutput', false);
-            
         end
         
         function response = apply(obj, image)
-            
             responses = obj.get_responses(image);
             response = common.Image( ...
                 cat(3, responses{:}), ...
                 'grid', image.Grid);
-            
         end
         
         function [frequencies, certainty, q_1] = get_frequencies(obj, image, varargin)
-            
             p = inputParser;
             addParameter(p, 'mode', 'strongest_vote', @isstr);
             parse(p, varargin{:});
@@ -107,9 +80,7 @@ classdef CircularGaborFilterBank < interfaces.FilterBank
             sigmas = cellfun(@(x)x.Sigma, obj.Filters);
             
             switch mode
-                
                 case 'strongest_vote'
-
                     % find maximum response index
                     [q_1, max_ind] = max(responses, [], 3);
 
@@ -136,9 +107,8 @@ classdef CircularGaborFilterBank < interfaces.FilterBank
                         ./ ((sigma_1 - sigma_2) .* (sigma_1 + sigma_2));
 
                     certainty = q_1;
-                    
+
                 case 'weighted'
-                    
                     votes = zeros(size(responses,1), size(responses,2), size(responses,3) - 1);
                     weights = votes;
                     
@@ -159,20 +129,15 @@ classdef CircularGaborFilterBank < interfaces.FilterBank
                             ./ ((sigma_1 - sigma_2) .* (sigma_1 + sigma_2));
                         
                         weights(:,:,i) = q_1;
-                        
                     end
                     
                     frequencies = sum(votes .* weights, 3) ./ sum(weights, 3);
                     certainty = max(weights, [], 3);
-
             end
-            
         end
-        
     end
     
     methods (Static)
-        
         function filter_bank = create(varargin)
            % creates a log-Gabor filter bank. sets up abscissae based on
            % filter bank limits.
@@ -184,7 +149,6 @@ classdef CircularGaborFilterBank < interfaces.FilterBank
            %        this will calculate the relative bandwidths and
            %        populate the filter bank with filters spaced according
            %        to 'spacing'
-           
            p = inputParser;
            addOptional(p, 'low_frequency', 1, @isscalar);
            addOptional(p, 'high_frequency', 5, @isscalar);
@@ -200,9 +164,7 @@ classdef CircularGaborFilterBank < interfaces.FilterBank
            spacing = p.Results.spacing;
            
            switch spacing
-               
                case 'hyperbolic'
-                   
                    % create center frequencies so that filters are linearly spaced in wavelength-space
                    min_wavelength = 1 / high_frequency;
                    max_wavelength = 1 / low_frequency;
@@ -213,9 +175,7 @@ classdef CircularGaborFilterBank < interfaces.FilterBank
                    d_wavelengths = (wavelengths(2) - wavelengths(1));
                    intersection_wavelengths = wavelengths - d_wavelengths / 2;
                    intersection_frequencies = sort(1 ./ intersection_wavelengths);
-                   
                case 'exponential'
-                   
                    r_multiplier = (high_frequency / low_frequency) ...
                        ^ (1 / (num_filters - 1));
 
@@ -225,14 +185,10 @@ classdef CircularGaborFilterBank < interfaces.FilterBank
                        coordinates(i) = r_multiplier ^ (i - 1) * low_frequency;
                        intersection_frequencies(i) = r_multiplier ^ (i - 1 + 0.5) * low_frequency;
                    end
-                   
                case 'linear'
-                   
                    coordinates = linspace(low_frequency, high_frequency, num_filters);
                    intersection_frequencies = coordinates + (coordinates(2)-coordinates(1)) / 2;
-                   
            end
-           
            % calculate sigmas
            k = 1 - selectivity;
            slk = sqrt(log(1/k));
@@ -247,10 +203,6 @@ classdef CircularGaborFilterBank < interfaces.FilterBank
            end
            
            filter_bank = filters.circular_gabor.CircularGaborFilterBank(filters_);
-           
         end
-        
     end
-    
 end
-            

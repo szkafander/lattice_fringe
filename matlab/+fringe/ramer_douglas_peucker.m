@@ -4,13 +4,11 @@ d_max = 0;
 ind = 0;
 
 for i = 2:size(points, 1)
-    
     d = utils.point_line_distance(points(i, :), points(1, :), points(end, :));
     if d > d_max
         ind = i;
         d_max = d;
     end
-    
 end
 
 if d_max >= epsilon

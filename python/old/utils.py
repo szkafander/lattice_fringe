@@ -1,5 +1,7 @@
 import numpy as np
 
+from numpy.fft import ifft2, fftshift
+
 from typing import Tuple
 
 
@@ -63,7 +65,8 @@ def get_impulse_response_components(
 
 
 def absolute_response(f_1: np.ndarray, f_2: np.ndarray) -> np.ndarray:
-    return np.abs(np.fft.ifft2(np.fft.fftshift(f_1 * f_2)))
+    """ Returns spatial-domain response of two frequency-domain signals. """
+    return np.abs(ifft2(fftshift(f_1 * f_2)))
 
 
 def uniquetol(array: np.ndarray, tolerance: float) -> np.ndarray:
