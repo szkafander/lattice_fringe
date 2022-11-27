@@ -8,7 +8,6 @@
 # from lattice_fringe.common.utils import dispatch_resize_args
 
 
-
 class LatticeFringeGridError(Exception):
     pass
 
@@ -27,6 +26,7 @@ class LatticeFringeDispatchResizeArgsError(LatticeFringeGridError):
 import numpy as np
 
 from lattice_fringe.interfaces import Grid, SpatialUnit
+from lattice_fringe.utils import overlay
 
 import warnings
 from typing import Any, Optional, Tuple, Union
@@ -127,13 +127,14 @@ class SpatialGrid(Grid):
         )
 
     def plot(self) -> None:
+        import matplotlib.pyplot as pl
         xx = self.coords_0 / np.abs(self.coords_0).max()
         yy = self.coords_1 / np.abs(self.coords_1).max()
         c = xx
         m = -xx
         y = yy
         pl.imshow(
-            utils.overlay(c, m, y),
+            overlay(c, m, y),
             extent=(*self.extent_0, *self.extent_1)
         )
         self.label_axes()

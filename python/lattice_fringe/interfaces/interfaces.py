@@ -51,7 +51,7 @@ class Grid(abc.ABC):
     def delta_1(self) -> float:
         return self.axis_1[1] - self.axis_1[0]
 
-    def label_axes(self, axes: Optional[pl.ax.Axes] = None) -> None:
+    def label_axes(self, axes: Optional[pl.axes.Axes] = None) -> None:
         axes = axes or pl.gca()
         axes.set_xlabel(
             self.x_name + f", {self.x_unit}" if self.x_unit else "")
