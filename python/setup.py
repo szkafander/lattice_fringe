@@ -10,5 +10,10 @@ setup(
     packages=find_packages(
         include=['lattice_fringe', 'lattice_fringe.*']
     ),
-    include_package_data=False
+    include_package_data=False,
+    install_requires=[
+        'scikit-image~=0.19',
+        'scipy~=1.7',
+        'matplotlib~=3.5'
+    ]
 )
