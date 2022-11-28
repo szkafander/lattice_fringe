@@ -1,4 +1,10 @@
 __pycache__
-.idea
+
 *.egg-info*
+
+.pytest_cache
+
+.legacy
+
+.idea
 .vscode
