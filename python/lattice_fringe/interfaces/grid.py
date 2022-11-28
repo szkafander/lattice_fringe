@@ -1,6 +1,7 @@
 import matplotlib.pyplot as pl
 import numpy as np
 
+from lattice_fringe.interfaces.unit import Unit
 from lattice_fringe.exceptions import (
     LatticeFringeGridSpecError,
     LatticeFringeDispatchResizeArgsError
@@ -8,6 +9,7 @@ from lattice_fringe.exceptions import (
 
 from abc import ABC, abstractmethod
 from typing import Optional, Tuple, Union
+import warnings
 
 
 def _dispatch_coords(
@@ -43,19 +45,6 @@ def _dispatch_resize_args(
         new_height = new_size[0]
         new_width = new_size[1]
     return new_height, new_width
-
-
-class Unit(ABC):
-
-    @property
-    @abstractmethod
-    def base(self, *args, **kwargs) -> "Unit":
-        pass
-
-    @property
-    @abstractmethod
-    def multiplier(self, *args, **kwargs) -> int:
-        pass
 
 
 class Grid(ABC):
@@ -117,17 +106,20 @@ class Grid(ABC):
     def name_1(self) -> str:
         pass
 
-    @abstractmethod
-    def transform(self, *args, **kwargs) -> "Grid":
-        pass
-
-    @abstractmethod
-    def plot(self, *args, **kwargs) -> None:
-        pass
-
-    @abstractmethod
-    def resize(self, *args, **kwargs) -> "Grid":
-        pass
+    def __eq__(self, other: "Grid") -> bool:
+        if not isinstance(other, self.__class__):
+            return False
+        with warnings.catch_warnings():
+            warnings.filterwarnings("ignore")
+            try:
+                x_equal = (self.coords_0 == other.coords_0).all()
+            except AttributeError:
+                return False
+            try:
+                y_equal = (self.coords_1 == other.coords_1).all()
+            except AttributeError:
+                return False
+        return x_equal and y_equal
 
     def __getitem__(self, item) -> "Grid":
         if len(item) > 2:
@@ -138,7 +130,7 @@ class Grid(ABC):
             unit=self.unit
         )
 
-    def label_axes(self, axes: Optional[pl.axes.Axes] = None) -> None:
+    def label_axes(self, axes: Optional[pl.Axes] = None) -> None:
         axes = axes or pl.gca()
         unit = f", {self.unit}" if self.unit else ""
         axes.set_xlabel(f"{self.name_0}, {unit}")
@@ -157,3 +149,11 @@ class Grid(ABC):
             y_axis,
             unit=self.unit
         )
+
+    @abstractmethod
+    def transform(self, *args, **kwargs) -> "Grid":
+        pass
+
+    @abstractmethod
+    def plot(self, *args, **kwargs) -> None:
+        pass

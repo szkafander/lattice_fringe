@@ -1,1 +1,1 @@
-from lattice_fringe.utils.utils import overlay
+from lattice_fringe.utils.visualization import get_composite
