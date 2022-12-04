@@ -1,1 +1,6 @@
-from lattice_fringe.units.units import Unit
+from lattice_fringe.units.units import (
+    Meter,
+    NanoMeter,
+    InverseMeter,
+    InverseNanoMeter
+)

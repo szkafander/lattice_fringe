@@ -28,7 +28,8 @@ def test_grid_names(bg):
     assert (bg.name_0, bg.name_1) == ("x", "y")
 
 
-def test_grid_axis_0(bg):
+def test_grid_axis_0(bg, request):
+    print(request)
     assert np.array_equal(bg.axis_0, [0, 1, 2, 3, 4])
 
 
