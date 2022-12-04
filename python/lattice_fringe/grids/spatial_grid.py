@@ -22,6 +22,14 @@ class SpatialGrid(Grid):
     ) -> None:
         super(SpatialGrid, self).__init__(coords_0, coords_1, unit)
 
+    @property
+    def name_0(self) -> str:
+        return "x"
+
+    @property
+    def name_1(self) -> str:
+        return "y"
+
     def transform(self) -> FrequencyGrid:
         from lattice_fringe.grids.frequency_grid import FrequencyGrid
         width = self.width
