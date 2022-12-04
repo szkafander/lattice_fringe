@@ -50,8 +50,3 @@ def test_grid_extent_1(bg):
 
 def test_grid_width_height(bg):
     assert (bg.width, bg.height) == (5, 4)
-
-
-@pytest.mark.parametrize("test_input,expected", [("3+5", 8), ("2+4", 6), ("6*9", 42)])
-def test_eval(test_input, expected):
-    assert eval(test_input) == expected
