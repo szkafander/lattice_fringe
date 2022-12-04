@@ -1,1 +1,2 @@
 from lattice_fringe.grids.spatial_grid import SpatialGrid
+from lattice_fringe.grids.frequency_grid import FrequencyGrid
