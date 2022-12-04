@@ -13,6 +13,10 @@ class Unit(ABC):
     def multiplier(self, *args, **kwargs) -> int:
         pass
 
+    @abstractmethod
+    def __repr__(self) -> str:
+        pass
+
 
 class FrequencyUnit(Unit, ABC):
 
