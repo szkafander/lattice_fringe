@@ -23,11 +23,12 @@ def basic_grid(_x0, _x1):
     return SpatialGrid(_x0, _x1, "unit")
 
 # TODO: Check this idea to solve the parameter combinations problem (sketch)
+# Source: https://stackoverflow.com/questions/39896716/can-i-perform-multiple-assertions-in-pytest
 def test_grid_axes():
     errors = []
 
     x0_arr = [[np.arange(2), [0, -1]],
-              [np.arange(5), [0, -1, 2, 3, 4]],
+              [np.arange(5), [0, 1, 2, 3, 4]],
               [np.arange(6), [0, -1, 2, 3, 4, 5]]]
 
     for elem in x0_arr:
