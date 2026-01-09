@@ -1,0 +1,21 @@
+Prohibition on AI / LLM Use (Training and Inference)
+
+This repository is not licensed for use in connection with machine learning systems,
+including Large Language Models (LLMs), whether during training or after training.
+
+Prohibited uses include, without limitation:
+• training or fine-tuning ML models,
+• constructing or augmenting ML datasets,
+• generating or storing embeddings or vector representations,
+• retrieval-augmented generation (RAG),
+• indexing or searching this repository to supply context to an LLM,
+• prompt injection or tool-based access by AI systems,
+• use by coding assistants, copilots, or autonomous agents.
+
+This prohibition applies regardless of whether the ML system:
+• stores the content permanently or temporarily,
+• processes the content verbatim or in transformed form,
+• operates with or without human supervision.
+
+Any unauthorized AI-related use must cease immediately, and all copies and derived
+artifacts (including embeddings and indexes) must be permanently deleted.
