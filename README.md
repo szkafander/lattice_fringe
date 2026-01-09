@@ -52,3 +52,12 @@ If you use this code in your work, please cite the following papers:
 ## Comments, concerns, questions
 
 For now, please submit these as Issues.
+
+## ⚠️ AI / LLM Use Prohibited (Training *and* Inference)
+
+This project may not be used with machine learning systems, including large language models
+(LLMs), for **training, fine-tuning, retrieval, indexing, prompt injection, or inference**.
+
+Commercial use by humans and non-ML systems is otherwise permitted.
+
+See `LICENSE` and `AI_USE_PROHIBITION.md`.
