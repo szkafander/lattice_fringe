@@ -1,0 +1,96 @@
+Copyright (c) YYYY <Your Name>
+
+Permission is hereby granted, free of charge, to any person or organization obtaining a copy
+of this software and associated documentation files (the “Software”), to use, reproduce,
+modify, merge, publish, distribute, sublicense, and/or sell copies of the Software,
+including for commercial purposes, subject to the following conditions:
+
+────────────────────────────────────────────────────────────
+ATTRIBUTION REQUIREMENT
+────────────────────────────────────────────────────────────
+
+1. Mandatory Credit
+Any use, distribution, or deployment of the Software, in source or binary form, must
+include clear and reasonable attribution to the original author.
+
+At a minimum, attribution must:
+(a) include the name of the copyright holder, and
+(b) be included in one of the following locations, as applicable:
+    • source code headers or NOTICE file,
+    • accompanying documentation,
+    • “About”, “Credits”, or legal notices section of an application.
+
+Failure to provide attribution constitutes a material breach of this license.
+
+────────────────────────────────────────────────────────────
+RESTRICTIONS ON MACHINE LEARNING AND AUTOMATED ACCESS
+────────────────────────────────────────────────────────────
+
+2. Prohibited Use in Machine Learning Systems
+The Software, in whole or in part, may not be used as input to, or in connection with,
+any machine learning system, including but not limited to large language models (LLMs),
+whether such use occurs:
+
+(a) during training, pre-training, fine-tuning, reinforcement learning, or evaluation;
+(b) during post-training inference, including retrieval-augmented generation (RAG),
+    prompt injection, tool invocation, indexing, search, or contextualization;
+(c) for the creation or use of datasets, corpora, embeddings, vector databases,
+    representations, or other derived artifacts intended for or used by ML systems.
+
+3. No Automated or Programmatic Access for ML Purposes
+You may not use automated, programmatic, or semi-automated means (including bots,
+crawlers, scrapers, agents, or AI-assisted systems) to access, collect, copy, or process
+the Software for any purpose described in Section 2.
+
+4. No AI Assistance or Copilot Use
+The Software may not be provided to, processed by, or used in conjunction with
+AI coding assistants, copilots, autonomous agents, or similar systems that generate,
+suggest, or complete code or text using machine learning techniques.
+
+5. No Circumvention
+You may not bypass, ignore, or override any technical, contractual, or signaling measures
+intended to limit automated access or machine learning use.
+
+────────────────────────────────────────────────────────────
+RESTRICTIONS ON RESALE
+────────────────────────────────────────────────────────────
+
+6. No Standalone Resale
+You may not sell, license, or otherwise commercialize the Software on a standalone basis.
+
+The Software may be distributed or sold only as:
+(a) part of a larger work, product, or service that provides substantial independent
+    functionality beyond the Software itself, or
+(b) a modification or derivative work that adds material original value.
+
+Resale of the Software that is primarily intended to extract or monetize the Software
+itself, without significant additional functionality, is prohibited.
+
+────────────────────────────────────────────────────────────
+GENERAL
+────────────────────────────────────────────────────────────
+
+7. Commercial Use Otherwise Permitted
+Except for the restrictions above, commercial use, modification, and distribution of the
+Software by human users and non-ML systems are expressly permitted.
+
+8. Reservation of Rights
+All rights not expressly granted are reserved by the copyright holder.
+
+9. Injunctive Relief
+Any violation of this license constitutes a material breach and may cause irreparable harm.
+The copyright holder is entitled to seek injunctive relief, specific performance, and other
+equitable remedies without the requirement of posting bond.
+
+10. Damages
+The copyright holder reserves the right to seek all available monetary remedies, including
+statutory, actual, consequential, and enhanced damages, to the maximum extent permitted
+by law.
+
+────────────────────────────────────────────────────────────
+DISCLAIMER
+────────────────────────────────────────────────────────────
+
+THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING
+BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+NONINFRINGEMENT.
